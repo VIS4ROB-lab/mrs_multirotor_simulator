@@ -582,170 +582,170 @@ void UavSystemRos::timeoutInput(void) {
 
   switch (last_input_mode) {
 
-  case UavSystem::POSITION_CMD: {
+    case UavSystem::POSITION_CMD: {
 
-    reference::Position cmd;
+      reference::Position cmd;
 
-    cmd.position = state.x;
-    cmd.heading  = mrs_lib::AttitudeConverter(state.R).getHeading();
+      cmd.position = state.x;
+      cmd.heading  = mrs_lib::AttitudeConverter(state.R).getHeading();
 
-    {
-      std::scoped_lock lock(mutex_uav_system_);
-      uav_system_.setInput(cmd);
+      {
+        std::scoped_lock lock(mutex_uav_system_);
+        uav_system_.setInput(cmd);
+      }
+
+      break;
     }
 
-    break;
-  }
+    case UavSystem::VELOCITY_HDG_CMD: {
 
-  case UavSystem::VELOCITY_HDG_CMD: {
+      reference::VelocityHdg cmd;
 
-    reference::VelocityHdg cmd;
+      cmd.velocity = Eigen::Vector3d(0, 0, 0);
+      cmd.heading  = mrs_lib::AttitudeConverter(state.R).getHeading();
 
-    cmd.velocity = Eigen::Vector3d(0, 0, 0);
-    cmd.heading  = mrs_lib::AttitudeConverter(state.R).getHeading();
+      {
+        std::scoped_lock lock(mutex_uav_system_);
+        uav_system_.setInput(cmd);
+      }
 
-    {
-      std::scoped_lock lock(mutex_uav_system_);
-      uav_system_.setInput(cmd);
+      break;
     }
 
-    break;
-  }
+    case UavSystem::VELOCITY_HDG_RATE_CMD: {
 
-  case UavSystem::VELOCITY_HDG_RATE_CMD: {
+      reference::VelocityHdgRate cmd;
 
-    reference::VelocityHdgRate cmd;
+      cmd.velocity     = Eigen::Vector3d(0, 0, 0);
+      cmd.heading_rate = 0;
 
-    cmd.velocity     = Eigen::Vector3d(0, 0, 0);
-    cmd.heading_rate = 0;
+      {
+        std::scoped_lock lock(mutex_uav_system_);
+        uav_system_.setInput(cmd);
+      }
 
-    {
-      std::scoped_lock lock(mutex_uav_system_);
-      uav_system_.setInput(cmd);
+      break;
     }
 
-    break;
-  }
+    case UavSystem::ACCELERATION_HDG_CMD: {
 
-  case UavSystem::ACCELERATION_HDG_CMD: {
+      reference::AccelerationHdg cmd;
 
-    reference::AccelerationHdg cmd;
+      cmd.acceleration = Eigen::Vector3d(0, 0, 0);
+      cmd.heading      = mrs_lib::AttitudeConverter(state.R).getHeading();
 
-    cmd.acceleration = Eigen::Vector3d(0, 0, 0);
-    cmd.heading      = mrs_lib::AttitudeConverter(state.R).getHeading();
+      {
+        std::scoped_lock lock(mutex_uav_system_);
+        uav_system_.setInput(cmd);
+      }
 
-    {
-      std::scoped_lock lock(mutex_uav_system_);
-      uav_system_.setInput(cmd);
+      break;
     }
 
-    break;
-  }
+    case UavSystem::ACCELERATION_HDG_RATE_CMD: {
 
-  case UavSystem::ACCELERATION_HDG_RATE_CMD: {
+      reference::AccelerationHdgRate cmd;
 
-    reference::AccelerationHdgRate cmd;
+      cmd.acceleration = Eigen::Vector3d(0, 0, 0);
+      cmd.heading_rate = 0;
 
-    cmd.acceleration = Eigen::Vector3d(0, 0, 0);
-    cmd.heading_rate = 0;
+      {
+        std::scoped_lock lock(mutex_uav_system_);
+        uav_system_.setInput(cmd);
+      }
 
-    {
-      std::scoped_lock lock(mutex_uav_system_);
-      uav_system_.setInput(cmd);
+      break;
     }
 
-    break;
-  }
+    case UavSystem::ATTITUDE_CMD: {
 
-  case UavSystem::ATTITUDE_CMD: {
+      reference::Attitude cmd;
 
-    reference::Attitude cmd;
+      double heading = mrs_lib::AttitudeConverter(state.R).getHeading();
 
-    double heading = mrs_lib::AttitudeConverter(state.R).getHeading();
+      cmd.orientation = mrs_lib::AttitudeConverter(0, 0, heading);
+      cmd.throttle    = 0.0;
 
-    cmd.orientation = mrs_lib::AttitudeConverter(0, 0, heading);
-    cmd.throttle    = 0.0;
+      {
+        std::scoped_lock lock(mutex_uav_system_);
+        uav_system_.setInput(cmd);
+      }
 
-    {
-      std::scoped_lock lock(mutex_uav_system_);
-      uav_system_.setInput(cmd);
+      break;
     }
 
-    break;
-  }
+    case UavSystem::TILT_HDG_RATE_CMD: {
 
-  case UavSystem::TILT_HDG_RATE_CMD: {
+      reference::TiltHdgRate cmd;
 
-    reference::TiltHdgRate cmd;
+      cmd.tilt_vector = Eigen::Vector3d(0, 0, 1);
+      cmd.throttle    = 0.0;
 
-    cmd.tilt_vector = Eigen::Vector3d(0, 0, 1);
-    cmd.throttle    = 0.0;
+      {
+        std::scoped_lock lock(mutex_uav_system_);
+        uav_system_.setInput(cmd);
+      }
 
-    {
-      std::scoped_lock lock(mutex_uav_system_);
-      uav_system_.setInput(cmd);
+      break;
     }
 
-    break;
-  }
+    case UavSystem::ATTITUDE_RATE_CMD: {
 
-  case UavSystem::ATTITUDE_RATE_CMD: {
+      reference::AttitudeRate cmd;
 
-    reference::AttitudeRate cmd;
+      cmd.rate_x   = 0;
+      cmd.rate_y   = 0;
+      cmd.rate_z   = 0;
+      cmd.throttle = 0.0;
 
-    cmd.rate_x   = 0;
-    cmd.rate_y   = 0;
-    cmd.rate_z   = 0;
-    cmd.throttle = 0.0;
+      {
+        std::scoped_lock lock(mutex_uav_system_);
+        uav_system_.setInput(cmd);
+      }
 
-    {
-      std::scoped_lock lock(mutex_uav_system_);
-      uav_system_.setInput(cmd);
+      break;
     }
 
-    break;
-  }
+    case UavSystem::CONTROL_GROUP_CMD: {
 
-  case UavSystem::CONTROL_GROUP_CMD: {
+      reference::ControlGroup cmd;
 
-    reference::ControlGroup cmd;
+      cmd.roll     = 0;
+      cmd.pitch    = 0;
+      cmd.yaw      = 0;
+      cmd.throttle = 0.0;
 
-    cmd.roll     = 0;
-    cmd.pitch    = 0;
-    cmd.yaw      = 0;
-    cmd.throttle = 0.0;
+      {
+        std::scoped_lock lock(mutex_uav_system_);
+        uav_system_.setInput(cmd);
+      }
 
-    {
-      std::scoped_lock lock(mutex_uav_system_);
-      uav_system_.setInput(cmd);
+      break;
     }
 
-    break;
-  }
+    case UavSystem::ACTUATOR_CMD: {
 
-  case UavSystem::ACTUATOR_CMD: {
+      reference::Actuators cmd;
 
-    reference::Actuators cmd;
+      cmd.motors = Eigen::VectorXd::Zero(model_params_.n_motors);
 
-    cmd.motors = Eigen::VectorXd::Zero(model_params_.n_motors);
+      {
+        std::scoped_lock lock(mutex_uav_system_);
+        uav_system_.setInput(cmd);
+      }
 
-    {
-      std::scoped_lock lock(mutex_uav_system_);
-      uav_system_.setInput(cmd);
+      break;
     }
 
-    break;
-  }
+    case UavSystem::INPUT_UNKNOWN: {
 
-  case UavSystem::INPUT_UNKNOWN: {
+      {
+        std::scoped_lock lock(mutex_uav_system_);
+        uav_system_.setInput();
+      }
 
-    {
-      std::scoped_lock lock(mutex_uav_system_);
-      uav_system_.setInput();
+      break;
     }
-
-    break;
-  }
   }
 }
 
@@ -1185,4 +1185,4 @@ bool UavSystemRos::callbackSetGroundZ(const std::shared_ptr<mrs_msgs::srv::Float
 
 //}
 
-} // namespace mrs_multirotor_simulator
+}  // namespace mrs_multirotor_simulator
