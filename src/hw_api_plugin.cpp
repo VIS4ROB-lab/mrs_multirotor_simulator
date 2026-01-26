@@ -92,7 +92,7 @@ class Api : public mrs_uav_hw_api::MrsUavHwApi {
 
   // | -------------------- service callbacks ------------------- |
 
-  std::tuple<bool, std::string> callbackArming(const bool& request);
+  std::tuple<bool, std::string> callbackArming(const bool &request);
   std::tuple<bool, std::string> callbackOffboard(void);
 
  private:
@@ -1003,7 +1003,7 @@ void Api::timeoutInputs(void) {
 
 //}
 
-}  // namespace mrs_uav_simulator_hw_api_plugin
+} // namespace mrs_uav_simulator_hw_api_plugin
 
 #include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(mrs_uav_simulator_hw_api_plugin::Api,
