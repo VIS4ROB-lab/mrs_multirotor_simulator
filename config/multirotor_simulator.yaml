@@ -34,6 +34,9 @@ subscribers:
   position_cmd:
     enabled: true
 
+  trajectory_cmd:
+    enabled: true
+
   velocity_hdg_cmd:
     enabled: true
 

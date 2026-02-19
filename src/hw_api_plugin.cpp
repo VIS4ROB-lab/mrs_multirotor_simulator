@@ -86,6 +86,8 @@ class Api : public mrs_uav_hw_api::MrsUavHwApi {
       const mrs_msgs::msg::HwApiVelocityHdgCmd::ConstSharedPtr msg);
   bool callbackPositionCmd(
       const mrs_msgs::msg::HwApiPositionCmd::ConstSharedPtr msg);
+    bool callbackTrajectoryCmd(
+      const mrs_msgs::msg::HwApiTrajectoryCmd::ConstSharedPtr msg);
 
   void callbackTrackerCmd(
       const mrs_msgs::msg::TrackerCommand::ConstSharedPtr msg);
@@ -130,6 +132,7 @@ class Api : public mrs_uav_hw_api::MrsUavHwApi {
   mrs_lib::PublisherHandler<mrs_msgs::msg::HwApiVelocityHdgCmd>
       ph_velocity_hdg_cmd_;
   mrs_lib::PublisherHandler<mrs_msgs::msg::HwApiPositionCmd> ph_position_cmd_;
+  mrs_lib::PublisherHandler<mrs_msgs::msg::HwApiTrajectoryCmd> ph_trajectory_cmd_;
   mrs_lib::PublisherHandler<mrs_msgs::msg::TrackerCommand> ph_tracker_cmd_;
 
   // | ------------------------- timers ------------------------- |
@@ -243,6 +246,8 @@ void Api::initialize(
                                (bool&)_capabilities_.accepts_velocity_hdg_cmd);
   local_param_loader.loadParam("input_mode/position",
                                (bool&)_capabilities_.accepts_position_cmd);
+  local_param_loader.loadParam("input_mode/trajectory",
+                               (bool&)_capabilities_.accepts_trajectory_cmd);
   local_param_loader.loadParam("input_mode/feedforward", _feedforward_enabled_);
 
   local_param_loader.loadParam("outputs/distance_sensor",
@@ -356,6 +361,12 @@ void Api::initialize(
     ph_position_cmd_ =
         mrs_lib::PublisherHandler<mrs_msgs::msg::HwApiPositionCmd>(
             node_, "~/simulator_position_cmd_out");
+  }
+
+  if (_capabilities_.accepts_trajectory_cmd) {
+    ph_trajectory_cmd_ =
+        mrs_lib::PublisherHandler<mrs_msgs::msg::HwApiTrajectoryCmd>(
+            node_, "~/simulator_trajectory_cmd_out");
   }
 
   if (_feedforward_enabled_) {
@@ -693,6 +704,31 @@ bool Api::callbackPositionCmd(
 
   if (offboard_) {
     ph_position_cmd_.publish(*msg);
+  }
+
+  {
+    std::scoped_lock lock(mutex_last_cmd_time_);
+
+    last_cmd_time_ = clock_->now();
+  }
+
+  return true;
+}
+
+//}
+
+/* callbackTrajectoryCmd() //{ */
+
+bool Api::callbackTrajectoryCmd(
+    const mrs_msgs::msg::HwApiTrajectoryCmd::ConstSharedPtr msg) {
+  if (!_capabilities_.accepts_trajectory_cmd) {
+    return false;
+  }
+
+  RCLCPP_INFO_ONCE(node_->get_logger(), "getting trajectory cmd");
+
+  if (offboard_) {
+    ph_trajectory_cmd_.publish(*msg);
   }
 
   {

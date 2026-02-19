@@ -29,6 +29,7 @@
 #include <mrs_msgs/msg/hw_api_velocity_hdg_rate_cmd.hpp>
 #include <mrs_msgs/msg/hw_api_velocity_hdg_cmd.hpp>
 #include <mrs_msgs/msg/hw_api_position_cmd.hpp>
+#include <mrs_msgs/msg/hw_api_trajectory_cmd.hpp>
 #include <mrs_msgs/msg/tracker_command.hpp>
 
 namespace mrs_multirotor_simulator
@@ -127,10 +128,12 @@ private:
   void callbackAccelerationHdgCmd(const mrs_msgs::msg::HwApiAccelerationHdgCmd::ConstSharedPtr msg);
   void callbackVelocityHdgRateCmd(const mrs_msgs::msg::HwApiVelocityHdgRateCmd::ConstSharedPtr msg);
   void callbackVelocityHdgCmd(const mrs_msgs::msg::HwApiVelocityHdgCmd::ConstSharedPtr msg);
+  void callbackTrajectoryCmd(const mrs_msgs::msg::HwApiTrajectoryCmd::ConstSharedPtr msg);
   void callbackPositionCmd(const mrs_msgs::msg::HwApiPositionCmd::ConstSharedPtr msg);
   void callbackTrackerCmd(const mrs_msgs::msg::TrackerCommand::ConstSharedPtr msg);
 
   rclcpp::Subscription<mrs_msgs::msg::HwApiPositionCmd>::SharedPtr sub_pos_cmd_;
+  rclcpp::Subscription<mrs_msgs::msg::HwApiTrajectoryCmd>::SharedPtr sub_traj_cmd_;
 
   mrs_lib::SubscriberHandler<mrs_msgs::msg::HwApiActuatorCmd>            sh_actuator_cmd_;
   mrs_lib::SubscriberHandler<mrs_msgs::msg::HwApiControlGroupCmd>        sh_control_group_cmd_;
@@ -141,6 +144,7 @@ private:
   mrs_lib::SubscriberHandler<mrs_msgs::msg::HwApiVelocityHdgRateCmd>     sh_velocity_hdg_rate_cmd_;
   mrs_lib::SubscriberHandler<mrs_msgs::msg::HwApiVelocityHdgCmd>         sh_velocity_hdg_cmd_;
   mrs_lib::SubscriberHandler<mrs_msgs::msg::HwApiPositionCmd>            sh_position_cmd_;
+  mrs_lib::SubscriberHandler<mrs_msgs::msg::HwApiTrajectoryCmd>          sh_trajectory_cmd_;
   mrs_lib::SubscriberHandler<mrs_msgs::msg::TrackerCommand>              sh_tracker_cmd_;
 
   // | --------------------- service servers -------------------- |

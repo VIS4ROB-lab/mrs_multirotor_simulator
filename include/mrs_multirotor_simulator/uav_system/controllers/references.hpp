@@ -272,6 +272,35 @@ public:
 
 //}
 
+/* Position //{ */
+
+class Trajectory {
+public:
+  Trajectory() {
+    this->position = Eigen::Vector3d::Zero();
+    this->velocity = Eigen::Vector3d::Zero();
+    this->acceleration = Eigen::Vector3d::Zero();
+  }
+
+  Eigen::Vector3d position;
+  Eigen::Vector3d velocity;
+  Eigen::Vector3d acceleration;
+
+  /**
+   * @brief atan2 of body-x axis projected to the ground plane
+   */
+  double heading = 0;
+  double heading_rate = 0;
+
+  friend std::ostream& operator<<(std::ostream& os, const Trajectory& data) {
+    os << "Trajectory: pos = " << data.position.transpose() << ", vel = " << data.velocity.transpose() 
+    << ", acc = " << data.acceleration.transpose() << ", heading = " << data.heading << ", heading_rate = " << data.heading_rate;
+    return os;
+  }
+};
+
+//}
+
 }  // namespace reference
 
 }  // namespace mrs_multirotor_simulator

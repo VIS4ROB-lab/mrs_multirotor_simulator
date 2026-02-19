@@ -216,9 +216,11 @@ UavSystemRos::UavSystemRos(const UavSystemRos_CommonHandlers_t common_handlers) 
   bool sub_attitude_rate_cmd_enabled;
   bool sub_control_group_cmd_enabled;
   bool sub_actuators_cmd_enabled;
+  bool sub_trajectory_cmd_enabled;
 
   param_loader.loadParam("subscribers/tracker_cmd/enabled", sub_tracker_cmd_enabled);
   param_loader.loadParam("subscribers/position_cmd/enabled", sub_pos_cmd_enabled);
+  param_loader.loadParam("subscribers/trajectory_cmd/enabled", sub_trajectory_cmd_enabled);
   param_loader.loadParam("subscribers/velocity_hdg_cmd/enabled", sub_vel_hdg_cmd_enabled);
   param_loader.loadParam("subscribers/velocity_hdg_rate_cmd/enabled", sub_vel_hdg_rate_cmd_enabled);
   param_loader.loadParam("subscribers/acceleration_hdg_cmd/enabled", sub_acc_hdg_cmd_enabled);
@@ -269,8 +271,13 @@ UavSystemRos::UavSystemRos(const UavSystemRos_CommonHandlers_t common_handlers) 
   }
 
   if (sub_pos_cmd_enabled) {
-    sh_position_cmd_ =
-        mrs_lib::SubscriberHandler<mrs_msgs::msg::HwApiPositionCmd>(shopts, "~/" + _uav_name_ + "/position_cmd", &UavSystemRos::callbackPositionCmd, this);
+    sh_position_cmd_ = mrs_lib::SubscriberHandler<mrs_msgs::msg::HwApiPositionCmd>(shopts, "~/" + _uav_name_ + "/position_cmd", 
+                                                                                   &UavSystemRos::callbackPositionCmd, this);
+  }
+
+  if (sub_trajectory_cmd_enabled) {
+    sh_trajectory_cmd_ = mrs_lib::SubscriberHandler<mrs_msgs::msg::HwApiTrajectoryCmd>(shopts, "~/" + _uav_name_ + "/trajectory_cmd",
+                                                                                       &UavSystemRos::callbackTrajectoryCmd, this);
   }
 
   if (sub_tracker_cmd_enabled) {
@@ -581,6 +588,25 @@ void UavSystemRos::timeoutInput(void) {
   MultirotorModel::State state = uav_system_.getState();
 
   switch (last_input_mode) {
+
+  case UavSystem::TRAJECTORY_CMD: {
+
+    reference::Trajectory cmd;
+
+    cmd.position = state.x;
+    cmd.velocity = Eigen::Vector3d(0, 0, 0);
+    cmd.acceleration = Eigen::Vector3d(0, 0, 0);
+
+    cmd.heading  = mrs_lib::AttitudeConverter(state.R).getHeading();
+    cmd.heading_rate = 0;
+
+    {
+      std::scoped_lock lock(mutex_uav_system_);
+      uav_system_.setInput(cmd);
+    }
+
+    break;
+  }
 
   case UavSystem::POSITION_CMD: {
 
@@ -1079,6 +1105,47 @@ void UavSystemRos::callbackPositionCmd(const mrs_msgs::msg::HwApiPositionCmd::Co
 
     time_last_input_ = time_stamp_;
     last_input_mode_ = UavSystem::POSITION_CMD;
+  }
+}
+
+//}
+
+/* callbackTrajectoryCmd() //{ */
+
+void UavSystemRos::callbackTrajectoryCmd(const mrs_msgs::msg::HwApiTrajectoryCmd::ConstSharedPtr msg) {
+
+  if (!is_initialized_) {
+    return;
+  }
+
+  RCLCPP_INFO_ONCE(node_->get_logger(), "getting trajectory command");
+
+  reference::Trajectory cmd;
+
+  cmd.heading = msg->heading;
+  cmd.heading_rate = msg->heading_rate;
+
+  cmd.position(0) = msg->position.x;
+  cmd.position(1) = msg->position.y;
+  cmd.position(2) = msg->position.z;
+  cmd.velocity(0) = msg->velocity.x;
+  cmd.velocity(1) = msg->velocity.y;
+  cmd.velocity(2) = msg->velocity.z;
+  cmd.acceleration(0) = msg->acceleration.x;
+  cmd.acceleration(1) = msg->acceleration.y;
+  cmd.acceleration(2) = msg->acceleration.z;
+  
+  {
+    std::scoped_lock lock(mutex_uav_system_);
+
+    uav_system_.setInput(cmd);
+  }
+
+  {
+    std::scoped_lock lock(mutex_time_last_input_);
+
+    time_last_input_ = time_stamp_;
+    last_input_mode_ = UavSystem::TRAJECTORY_CMD;
   }
 }
 

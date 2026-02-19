@@ -29,6 +29,7 @@ public:
     VELOCITY_HDG_RATE_CMD,
     VELOCITY_HDG_CMD,
     POSITION_CMD,
+    TRAJECTORY_CMD,
   };
 
   UavSystem(void);
@@ -52,6 +53,7 @@ public:
   void setInput(const reference::VelocityHdgRate& velocity);
   void setInput(const reference::VelocityHdg& velocity);
   void setInput(const reference::Position& position);
+  void setInput(const reference::Trajectory& trajectory);
   void setInput(void);
 
   void setFeedforward(const reference::AccelerationHdgRate& cmd);
@@ -106,6 +108,7 @@ private:
   reference::VelocityHdgRate     velocity_hdg_rate_cmd_;
   reference::VelocityHdg         velocity_hdg_cmd_;
   reference::Position            position_cmd_;
+  reference::Trajectory          trajectory_cmd_;
 
   // | ------------------- feedforward inputs ------------------- |
 
@@ -242,6 +245,13 @@ void UavSystem::setInput(const reference::Position& cmd) {
   active_input_ = POSITION_CMD;
 }
 
+void UavSystem::setInput(const reference::Trajectory& cmd) {
+
+  trajectory_cmd_ = cmd;
+
+  active_input_ = TRAJECTORY_CMD;
+}
+
 void UavSystem::setInput(void) {
 
   active_input_ = INPUT_UNKNOWN;
@@ -310,6 +320,17 @@ void UavSystem::makeStep(const double dt) {
     actuators_cmd_.motors = Eigen::VectorXd::Zero(multirotor_model_.getParams().n_motors);
 
   } else {
+
+    if (active_input == UavSystem::TRAJECTORY_CMD) {
+      velocity_hdg_cmd_ = position_controller_.getControlSignal(multirotor_model_.getState(), trajectory_cmd_, dt);
+      active_input      = VELOCITY_HDG_CMD;
+
+      if (velocity_hdg_ff_) {
+        velocity_hdg_cmd_.velocity += velocity_hdg_ff_->velocity;
+      } else if (velocity_hdg_rate_ff_) {
+        velocity_hdg_cmd_.velocity += velocity_hdg_rate_ff_->velocity;
+      }
+    }
 
     if (active_input == UavSystem::POSITION_CMD) {
       velocity_hdg_cmd_ = position_controller_.getControlSignal(multirotor_model_.getState(), position_cmd_, dt);

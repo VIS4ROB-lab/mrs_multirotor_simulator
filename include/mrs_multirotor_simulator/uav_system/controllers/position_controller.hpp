@@ -25,6 +25,7 @@ public:
   void setParams(const Params& params);
 
   reference::VelocityHdg getControlSignal(const MultirotorModel::State& state, const reference::Position& reference, const double& dt);
+  reference::VelocityHdg getControlSignal(const MultirotorModel::State& state, const reference::Trajectory& reference, const double& dt);
 
 private:
   MultirotorModel::ModelParams model_params_;
@@ -71,6 +72,21 @@ void PositionController::setParams(const Params& params) {
 /* getControlSignal() //{ */
 
 reference::VelocityHdg PositionController::getControlSignal(const MultirotorModel::State& state, const reference::Position& reference, const double& dt) {
+
+  Eigen::Vector3d pos_error = reference.position - state.x;
+
+  reference::VelocityHdg output;
+
+  output.velocity(0) = pid_x_.update(pos_error(0), dt);
+  output.velocity(1) = pid_y_.update(pos_error(1), dt);
+  output.velocity(2) = pid_z_.update(pos_error(2), dt);
+
+  output.heading = reference.heading;
+
+  return output;
+}
+
+reference::VelocityHdg PositionController::getControlSignal(const MultirotorModel::State& state, const reference::Trajectory& reference, const double& dt) {
 
   Eigen::Vector3d pos_error = reference.position - state.x;
 
