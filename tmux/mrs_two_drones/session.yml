@@ -37,13 +37,13 @@ windows:
   - midair_activation:
       layout: tiled
       panes:
-        - export UAV_NAME=uav1; waitForCore; ./midair_activation.sh
-        - export UAV_NAME=uav2; waitForCore; ./midair_activation.sh
+        - export UAV_NAME=uav1; sleep 10; ./midair_activation.sh
+        - export UAV_NAME=uav2; sleep 10; ./midair_activation.sh
   - goto:
       layout: tiled
       panes:
-        - export UAV_NAME=uav1; waitForTakeoff; ./goto1.py
-        - export UAV_NAME=uav2; waitForTakeoff; ./goto2.py
+        - export UAV_NAME=uav1; sleep 10; ./goto1.py
+        - export UAV_NAME=uav2; sleep 10; ./goto2.py
   - rviz:
       layout: tiled
       panes:

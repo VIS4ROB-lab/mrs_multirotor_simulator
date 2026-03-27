@@ -21,6 +21,7 @@ plugin:
     velocity_hdg_rate:     false
     velocity_hdg:          false
     position:              false
+    trajectory:            false
 
     feedforward: true
 
