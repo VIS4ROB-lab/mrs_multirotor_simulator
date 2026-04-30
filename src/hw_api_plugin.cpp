@@ -86,7 +86,7 @@ class Api : public mrs_uav_hw_api::MrsUavHwApi {
       const mrs_msgs::msg::HwApiVelocityHdgCmd::ConstSharedPtr msg);
   bool callbackPositionCmd(
       const mrs_msgs::msg::HwApiPositionCmd::ConstSharedPtr msg);
-    bool callbackTrajectoryCmd(
+  bool callbackTrajectoryCmd(
       const mrs_msgs::msg::HwApiTrajectoryCmd::ConstSharedPtr msg);
 
   void callbackTrackerCmd(
@@ -94,8 +94,9 @@ class Api : public mrs_uav_hw_api::MrsUavHwApi {
 
   // | -------------------- service callbacks ------------------- |
 
-  std::tuple<bool, std::string> callbackArming(const bool &request);
+  std::tuple<bool, std::string> callbackArming(const bool& request);
   std::tuple<bool, std::string> callbackOffboard(void);
+  std::tuple<bool, std::string> callbackReboot(void);
 
  private:
   bool is_initialized_ = false;
@@ -132,7 +133,8 @@ class Api : public mrs_uav_hw_api::MrsUavHwApi {
   mrs_lib::PublisherHandler<mrs_msgs::msg::HwApiVelocityHdgCmd>
       ph_velocity_hdg_cmd_;
   mrs_lib::PublisherHandler<mrs_msgs::msg::HwApiPositionCmd> ph_position_cmd_;
-  mrs_lib::PublisherHandler<mrs_msgs::msg::HwApiTrajectoryCmd> ph_trajectory_cmd_;
+  mrs_lib::PublisherHandler<mrs_msgs::msg::HwApiTrajectoryCmd>
+      ph_trajectory_cmd_;
   mrs_lib::PublisherHandler<mrs_msgs::msg::TrackerCommand> ph_tracker_cmd_;
 
   // | ------------------------- timers ------------------------- |
@@ -484,6 +486,18 @@ std::tuple<bool, std::string> Api::callbackOffboard(void) {
   mode_ = "OFFBOARD";
 
   ss << "Offboard set";
+  RCLCPP_INFO(node_->get_logger(), "%s", ss.str().c_str());
+  return {true, ss.str()};
+}
+
+//}
+
+/* callbackReboot() //{ */
+
+std::tuple<bool, std::string> Api::callbackReboot(void) {
+  std::stringstream ss;
+
+  ss << "Rebooting...";
   RCLCPP_INFO(node_->get_logger(), "%s", ss.str().c_str());
   return {true, ss.str()};
 }
@@ -1039,7 +1053,7 @@ void Api::timeoutInputs(void) {
 
 //}
 
-} // namespace mrs_uav_simulator_hw_api_plugin
+}  // namespace mrs_uav_simulator_hw_api_plugin
 
 #include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(mrs_uav_simulator_hw_api_plugin::Api,
